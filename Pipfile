@@ -1,0 +1,13 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pytest = "*"
+pytest-cov = "*"
+poetry = "*"
+
+[scripts]
+test = "pytest"
+build = "poetry build"

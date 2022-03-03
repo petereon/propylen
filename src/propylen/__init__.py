@@ -19,7 +19,8 @@ def cli():
 @click.option('--license', 'license_name', type=str, default='NA', help='The license of the project')
 @click.option('--python-version', type=str, default='^3.6')
 @click.option('--include-tests/--no-include-tests', default=True, help='Whether to include tests in the project')
-def initialize_project(name, path=os.getcwd(), version='0.1.0', author='NOT_PROVIDED', email='notprovided', description='Some wild Python project', license_name='NA', python_version='^3.6', include_tests=True, interactive=False):
+@click.option('--executable/--no-executable', default=True, help='Whether to include __main__.py in the project')
+def initialize_project(name, path=os.getcwd(), version='0.1.0', author='NOT_PROVIDED', email='notprovided', description='Some wild Python project', license_name='NA', python_version='^3.6', include_tests=True, interactive=True, executable=True):
     if interactive:
         name = click.prompt('Project name', type=str, default=name)
         version = click.prompt('Version:', default=version)
@@ -29,11 +30,15 @@ def initialize_project(name, path=os.getcwd(), version='0.1.0', author='NOT_PROV
         license_name = click.prompt('License:', default=license_name)
         python_version = click.prompt('Python version:', default=python_version)
         include_tests = click.confirm('Include tests?', default=include_tests)
+        executable = click.confirm('Include __main__.py?', default=executable)
         
     
     os.makedirs(f"{path}/{name}/src/{name}", exist_ok=True)
     with open(f"{path}/{name}/src/{name}/__init__.py", 'w') as f:
         pass
+    if executable:
+        with open(f"{path}/{name}/src/{name}/__main__.py", 'w') as f:
+            pass
     
     pipfile_dict = {
         'source' : [{

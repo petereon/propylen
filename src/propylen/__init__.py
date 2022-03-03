@@ -3,9 +3,8 @@ import click
 import toml
 
 @click.group()
-@click.option('--debug/--no-debug', default=False)
-def cli(debug):
-    click.echo(f"Debug mode is {'on' if debug else 'off'}")
+def cli():
+    pass
 
 
 @cli.command('init')
@@ -85,7 +84,7 @@ def initialize_project(name, path=os.getcwd(), version='0.1.0', author='NOT_PROV
                         'python_files': ["*test*.py"],
                         'python_functions': ["test"],
                         'minversion': "6.0",
-                        'addopts': "--cov=expycted --cov-report=term-missing",
+                        'addopts': f"--cov={name} --cov-report=term-missing",
                         'testpaths': ["test"],
             }
         }

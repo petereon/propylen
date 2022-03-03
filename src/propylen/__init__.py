@@ -119,8 +119,7 @@ def initialize_project(name, path=os.getcwd(), version="0.1.0", author="NOT_PROV
         
     with open(f"{path}/{name}/README", "w") as f:
         f.write("# " + name + "\n")
-    
-@cli.command("reconcile", help="Reconcile Pipfile dependencies with pyproject.toml")
+
 def reconcile_dependencies():
     pipfile_dict = toml.load(f"./Pipfile")
     pyproject_toml_dict = toml.load(f"./pyproject.toml")
@@ -137,6 +136,13 @@ def reconcile_dependencies():
     with open(f"./pyproject.toml", "w") as f:
         f.write(toml.dumps(pyproject_toml_dict))
         
+        
+@cli.command("reconcile", help="Reconcile Pipfile dependencies with pyproject.toml")
+def reconcile_dependencies_wrapper():
+    reconcile_dependencies()
+
+
+        
 @cli.command("install", help="Install packages")
 @click.option("-d", "--dev", is_flag=True, help="Install dev packages")
 @click.argument("packages", nargs=-1)
@@ -146,6 +152,7 @@ def install_packages(dev, packages):
         command.append("--dev")
     command.extend(packages)
     print(pipenv.cli.main(command))
+    reconcile_dependencies()
     
     
 @cli.command("uninstall", help="Uninstall packages")
@@ -154,6 +161,7 @@ def install_packages(packages):
     command = ['uninstall']
     command.extend(packages)
     print(pipenv.cli.main(command))
+    reconcile_dependencies()
 
 
 @cli.command("build", help="Build a package into a wheel")

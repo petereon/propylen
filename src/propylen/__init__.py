@@ -1,5 +1,7 @@
+import json
 import os
 import click
+from click.exceptions import Exit
 import toml
 import pipenv
 from  poetry.console.application import Application
@@ -119,21 +121,31 @@ def initialize_project(name, path=os.getcwd(), version="0.1.0", author="NOT_PROV
         
     with open(f"{path}/{name}/README", "w") as f:
         f.write("# " + name + "\n")
+        
+        
+
 
 def reconcile_dependencies():
-    pipfile_dict = toml.load(f"./Pipfile")
-    pyproject_toml_dict = toml.load(f"./pyproject.toml")
+    pipfile_dict = toml.load("./Pipfile")
+    pyproject_toml_dict = toml.load("./pyproject.toml")
     
     python_version = pyproject_toml_dict["tool"]["poetry"]["dependencies"]["python"]
+    
     packages = pipfile_dict["packages"]
-    packages = {k: v.replace("==", "") for k, v in packages.items()}
+    
+    with open("./Pipfile.lock", "r") as f:
+        lock_dict = json.load(f)
+    try:
+        packages = {k: lock_dict['default'][k]['version'].replace("==", "^") if v == '*' else v for k, v in packages.items()}
+    except KeyError:
+        install_packages(False, [])
     
     packages["python"] = python_version
     
     pyproject_toml_dict["tool"]["poetry"]["dependencies"] = packages
     
 
-    with open(f"./pyproject.toml", "w") as f:
+    with open("./pyproject.toml", "w") as f:
         f.write(toml.dumps(pyproject_toml_dict))
         
         
@@ -142,34 +154,45 @@ def reconcile_dependencies_wrapper():
     reconcile_dependencies()
 
 
-        
-@cli.command("install", help="Install packages")
-@click.option("-d", "--dev", is_flag=True, help="Install dev packages")
-@click.argument("packages", nargs=-1)
 def install_packages(dev, packages):
     command = ['install']
     if dev:
         command.append("--dev")
     command.extend(packages)
-    print(pipenv.cli.main(command))
-    reconcile_dependencies()
-    
+    try:
+        pipenv.cli.main(command)
+    except Exception:
+        pass
+    finally:
+        reconcile_dependencies()
+
+        
+@cli.command("install", help="Install packages")
+@click.option("-d", "--dev", is_flag=True, help="Install dev packages")
+@click.argument("packages", nargs=-1)
+def install_packages_wrapper(dev, packages):
+    install_packages(dev, packages)
+
     
 @cli.command("uninstall", help="Uninstall packages")
 @click.argument("packages", nargs=-1)
 def install_packages(packages):
     command = ['uninstall']
     command.extend(packages)
-    print(pipenv.cli.main(command))
-    reconcile_dependencies()
+    try:
+        pipenv.cli.main(command)
+    except Exception:
+        pass
+    finally:
+        reconcile_dependencies()
 
 
 @cli.command("build", help="Build a package into a wheel")
 @click.option('--format', '-f', "build_format", type=click.Choice(['wheel', 'sdist', 'both']), default='both', help="Build format")
 def install_packages(build_format):
     application = Application()
+    reconcile_dependencies()
     
     command = application.find("build")
     run = CommandTester(command)
-    
     run.execute(f"--format {build_format}" if not build_format=="both" else "")

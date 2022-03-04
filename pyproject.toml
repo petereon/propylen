@@ -1,27 +1,33 @@
+[build-system]
+requires = [ "poetry-core>=1.0.0",]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "propylen"
 version = "0.3.1"
 description = "Python project scaffolding generator"
-authors = ["Petereon <pvyboch1@gmail.com>"]
+authors = [ "Petereon <pvyboch1@gmail.com>",]
 license = "MIT"
-repository = 'https://github.com/petereon/propylen'
-readme = 'PYPIREADME.md'
-keywords = ['project', 'template', 'generator', 'scaffolding']
-classifiers = [
-    'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3',
-    'Natural Language :: English',
-]
+repository = "https://github.com/petereon/propylen"
+readme = "README.md"
+keywords = [ "project", "template", "generator", "scaffolding",]
+classifiers = [ "License :: OSI Approved :: MIT License", "Programming Language :: Python :: 3", "Natural Language :: English",]
+
 [tool.poetry.dependencies]
+poetry = "^1.1.13"
+rich = "^11.2.0"
+click = "^8.0.4"
+toml = "^0.10.2"
+pipenv = "^2022.1.8"
+cleo = "^0.8.1"
 python = "^3.7"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.scripts]
+propylen = "propylen:cli"
 
 [tool.pytest.ini_options]
-python_files = ["*test*.py"]
-python_functions = ["test"]
+python_files = [ "*test*.py",]
+python_functions = [ "test",]
 minversion = "6.0"
 addopts = "--cov=propylen --cov-report=term-missing"
-testpaths = ["test"]
+testpaths = [ "test",]

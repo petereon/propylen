@@ -15,7 +15,7 @@ pipx install propylen
 
 You can generate a project structure interactively:
 ```
-propylen init <package-name>
+propylen init <project-name>
 ```
 
 Alternatively, you can provide necessary infromation in form of command line options. To see available options:

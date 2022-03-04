@@ -5,11 +5,11 @@ name = "pypi"
 
 [packages]
 poetry = "*"
-rich = "*"
 click = "*"
 toml = "*"
 pipenv = "*"
 cleo = "*"
+emoji = "*"
 
 [dev-packages]
 pytest = "*"

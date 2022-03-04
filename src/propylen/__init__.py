@@ -7,15 +7,7 @@ import pipenv
 from  poetry.console.application import Application
 from cleo import CommandTester
 
-from rich.console import Console
-from rich.theme import Theme
-custom_theme = Theme({
-    "info": "dim cyan",
-    "comment": "italic magenta",
-    "danger": "bold red"
-})
-
-console = Console(theme=custom_theme)
+import emoji
 
 
 @click.group()
@@ -37,17 +29,17 @@ def cli():
 @click.option("--include-tests/--no-include-tests", default=True, help="Whether to include tests in the project")
 @click.option("--executable/--no-executable", default=True, help="Whether to include __main__.py in the project")
 def initialize_project(name, path=os.getcwd(), version="0.1.0", author="NOT_PROVIDED", email="notprovided", description="Some wild Python project", license_name="NA", python_version="^3.6", include_tests=True, interactive=True, executable=True):
-    console.print(":sparkles: Initializing new awesome project...")
+    click.echo(emoji.emojize(":sparkles: Initializing new awesome project...\n"))
     
     if interactive:
-        version = click.prompt("Version:", default=version)
-        author = click.prompt("Author:", default=author)
-        email = click.prompt("Email:", default=email)
-        description = click.prompt("Description:", default=description)
-        license_name = click.prompt("License:", default=license_name)
-        python_version = click.prompt("Python version:", default=python_version)
-        include_tests = click.confirm("Include tests?", default=include_tests)
-        executable = click.confirm("Include __main__.py?", default=executable)
+        version = click.prompt(emoji.emojize(":input_numbers: Version:"), default=version)
+        author = click.prompt(emoji.emojize(":nerd_face: Author:"), default=author)
+        email = click.prompt(emoji.emojize(":e-mail: Email:"), default=email)
+        description = click.prompt(emoji.emojize(":pen: Description:"), default=description)
+        license_name = click.prompt(emoji.emojize(":scroll: License:"), default=license_name)
+        python_version = click.prompt(emoji.emojize(":input_numbers: Python version:"), default=python_version)
+        include_tests = click.confirm(emoji.emojize(":safety_vest: Include tests?"), default=include_tests)
+        executable = click.confirm(emoji.emojize(":person_running: Include __main__.py?"), default=executable)
     
     os.makedirs(f"{path}/{name}/src/{name}", exist_ok=True)
     with open(f"{path}/{name}/src/{name}/__init__.py", "w") as f:
@@ -96,7 +88,6 @@ def initialize_project(name, path=os.getcwd(), version="0.1.0", author="NOT_PROV
     }
     
     if include_tests:
-        console.print(":white_check_mark: Including tests...")
         os.makedirs(f"{path}/{name}/test", exist_ok=True)
         
         pipfile_dict["dev-packages"]["pytest"] = "*"
@@ -112,6 +103,7 @@ def initialize_project(name, path=os.getcwd(), version="0.1.0", author="NOT_PROV
                         "testpaths": ["test"],
             }
         }
+    click.echo(emoji.emojize("\n:party_popper: You are all set, happy coding!"))
         
         
     
@@ -128,7 +120,7 @@ def initialize_project(name, path=os.getcwd(), version="0.1.0", author="NOT_PROV
 
 
 def reconcile_dependencies():
-    console.print(':package: Reconciling dependencies...')
+    click.echo(emoji.emojize(':mag: Reconciling dependencies...'))
     pipfile_dict = toml.load("./Pipfile")
     pyproject_toml_dict = toml.load("./pyproject.toml")
     
@@ -143,7 +135,7 @@ def reconcile_dependencies():
     except KeyError:
         install_packages(False, [])
         
-    yield packages
+    packages_version = packages.copy()
     
     packages["python"] = python_version
     
@@ -153,6 +145,7 @@ def reconcile_dependencies():
     with open("./pyproject.toml", "w") as f:
         f.write(toml.dumps(pyproject_toml_dict))
         
+    return packages_version
     
         
         
@@ -160,7 +153,7 @@ def reconcile_dependencies():
 def reconcile_dependencies_wrapper():
     deps = reconcile_dependencies()
     for package, version in deps.items():
-        console.print(f" - {package}: {version}")    
+        click.echo(f" - {package}: {version}")
 
 
 def install_packages(dev, packages):
@@ -180,17 +173,17 @@ def install_packages(dev, packages):
 @click.option("-d", "--dev", is_flag=True, help="Install dev packages")
 @click.argument("packages", nargs=-1)
 def install_packages_wrapper(dev, packages):
-    if packages is not []:
-        console.print(f":heavy_plus_sign: Installing packages: {packages}")
+    if len(packages) != 0:
+        click.echo(emoji.emojize(f":plus: Installing packages: {packages}"))
     else:
-        console.print(":package: Installing packages")
+        click.echo(emoji.emojize(":package: Installing packages"))
     install_packages(dev, packages)
 
     
 @cli.command("uninstall", help="Uninstall packages")
 @click.argument("packages", nargs=-1)
 def uninstall_packages(packages):
-    console.print(f":heavy_minus_sign: Uninstalling packages: {packages}")
+    click.echo(emoji.emojize(f":minus: Uninstalling packages: {packages}"))
     command = ['uninstall']
     command.extend(packages)
     try:
@@ -204,7 +197,7 @@ def uninstall_packages(packages):
 @cli.command("build", help="Build a package into a wheel")
 @click.option('--format', '-f', "build_format", type=click.Choice(['wheel', 'sdist', 'both']), default='both', help="Build format")
 def build(build_format):
-    console.print(f":building_construction: Building as {build_format}")
+    click.echo(emoji.emojize(":building_construction: Building"))
     application = Application()
     reconcile_dependencies()
     

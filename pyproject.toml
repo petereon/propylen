@@ -15,11 +15,11 @@ classifiers = [ "License :: OSI Approved :: MIT License", "Programming Language 
 
 [tool.poetry.dependencies]
 poetry = "^1.1.13"
-rich = "^11.2.0"
 click = "^8.0.4"
 toml = "^0.10.2"
 pipenv = "^2022.1.8"
 cleo = "^0.8.1"
+emoji = "^1.6.3"
 python = "^3.7"
 
 [tool.poetry.scripts]

@@ -2,6 +2,8 @@
 
 __Propylen__ is a Python CLI tool for generating Python projects. In nature, it is a wrapper around pipenv and poetry with some added swag.
 
+__NOTE: Package is not yet fully tested__
+
 # Installation
 
 __Propylen__ should be installed using `pipx` as:

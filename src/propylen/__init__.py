@@ -31,6 +31,8 @@ def cli():
 def initialize_project(name, path=os.getcwd(), version="0.1.0", author="NOT_PROVIDED", email="notprovided", description="Some wild Python project", license_name="NA", python_version="^3.6", include_tests=True, interactive=True, executable=True):
     click.echo(emoji.emojize(":sparkles: Initializing new awesome project...\n"))
     
+    # TODO: Check existence and structure of Pipfile and pyproject.toml
+           
     if interactive:
         version = click.prompt(emoji.emojize(":input_numbers: Version:"), default=version)
         author = click.prompt(emoji.emojize(":nerd_face: Author:"), default=author)
@@ -105,7 +107,6 @@ def initialize_project(name, path=os.getcwd(), version="0.1.0", author="NOT_PROV
         }
     click.echo(emoji.emojize("\n:party_popper: You are all set, happy coding!"))
         
-        
     
     with open(f"{path}/{name}/Pipfile", "w") as f:
         f.write(toml.dumps(pipfile_dict))
@@ -121,21 +122,42 @@ def initialize_project(name, path=os.getcwd(), version="0.1.0", author="NOT_PROV
 
 def reconcile_dependencies():
     click.echo(emoji.emojize(':mag: Reconciling dependencies...'))
+    
+    dir_content = os.listdir("./")
+    if 'Pipfile' not in dir_content or 'pyproject.toml' not in dir_content:
+        click.echo(emoji.emojize(":warning: Pipfile or poetry.lock not found. Run `propylen init` first."))
+        exit(1)
+    
     pipfile_dict = toml.load("./Pipfile")
+    
     pyproject_toml_dict = toml.load("./pyproject.toml")
     
-    proactive_versioning = pyproject_toml_dict["tool"]["propylen"]["proactive_versioning"]
-    
-    python_version = pyproject_toml_dict["tool"]["poetry"]["dependencies"]["python"]
-    
-    packages = pipfile_dict["packages"]
-    
-    with open("./Pipfile.lock", "r") as f:
-        lock_dict = json.load(f)
+    proactive_versioning = pyproject_toml_dict.get("tool", {}).get("propylen", {}).get("proactive_versioning", False)
     try:
-        packages = {k: lock_dict['default'][k]['version'].replace("==", "^") if (v == '*' and proactive_versioning) else v for k, v in packages.items()}
+        
+        python_version = pyproject_toml_dict["tool"]["poetry"]["dependencies"]["python"]
+        packages = pipfile_dict["packages"]
+    
     except KeyError:
+        
+        click.echo(emoji.emojize(":warning: pyproject.toml or Pipfile doesn't contain expected fields, did you run `propylen init`?"))
+        exit(1)
+        
+    try:
+        
+        with open("./Pipfile.lock", "r") as f:
+            lock_dict = json.load(f)
+        
+        packages = {k: lock_dict['default'][k]['version'].replace("==", "^") if (v == '*' and proactive_versioning) else v for k, v in packages.items()}
+    
+    except KeyError:
+        
+        click.echo(emoji.emojize(":package: No Pipfile.lock found, installing packages"))
         install_packages(False, [])
+        with open("./Pipfile.lock", "r") as f:
+            lock_dict = json.load(f)
+        
+        packages = {k: lock_dict['default'][k]['version'].replace("==", "^") if (v == '*' and proactive_versioning) else v for k, v in packages.items()}
         
     packages_version = packages.copy()
     
@@ -159,6 +181,10 @@ def reconcile_dependencies_wrapper():
 
 
 def install_packages(dev, packages, reconcile):
+    dir_content = os.listdir("./")
+    if 'Pipfile' not in dir_content or 'pyproject.toml' not in dir_content:
+        click.echo(emoji.emojize(":warning: Pipfile or poetry.lock not found. Run `propylen init` first."))
+        exit(1)
     command = ['install']
     if dev:
         command.append("--dev")
@@ -168,7 +194,7 @@ def install_packages(dev, packages, reconcile):
     except Exception:
         pass
     finally:
-        if reconcile or toml.load("./pyproject.toml")["tool"]["propylen"]["auto_reconcile_dependencies"]:
+        if reconcile or toml.load("./pyproject.toml")["tool"].get("propylen", {}).get("auto_reconcile_dependencies", False):
             reconcile_dependencies()
 
         
@@ -188,6 +214,10 @@ def install_packages_wrapper(dev, packages, reconcile):
 @click.argument("packages", nargs=-1)
 @click.option("--reconcile/--no-reconcile", default=True, is_flag=True, help="Reconcile dependencies")
 def uninstall_packages(packages, reconcile):
+    dir_content = os.listdir("./")
+    if 'Pipfile' not in dir_content or 'pyproject.toml' not in dir_content:
+        click.echo(emoji.emojize(":warning: Pipfile or poetry.lock not found. Run `propylen init` first."))
+        exit(1)
     click.echo(emoji.emojize(f":minus: Uninstalling packages: {packages}"))
     command = ['uninstall']
     command.extend(packages)
@@ -196,7 +226,7 @@ def uninstall_packages(packages, reconcile):
     except Exception:
         pass
     finally:
-        if reconcile or toml.load("./pyproject.toml")["tool"]["propylen"]["auto_reconcile_dependencies"]:
+        if reconcile or toml.load("./pyproject.toml")["tool"].get("propylen", {}).get("auto_reconcile_dependencies", False):
             reconcile_dependencies()
 
 

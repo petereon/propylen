@@ -31,3 +31,7 @@ python_functions = [ "test",]
 minversion = "6.0"
 addopts = "--cov=propylen --cov-report=term-missing"
 testpaths = [ "test",]
+
+[tool.propylen]
+proactive_versioning = true
+auto_reconcile_dependencies = true

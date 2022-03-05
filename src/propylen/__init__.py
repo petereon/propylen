@@ -124,6 +124,8 @@ def reconcile_dependencies():
     pipfile_dict = toml.load("./Pipfile")
     pyproject_toml_dict = toml.load("./pyproject.toml")
     
+    proactive_versioning = pyproject_toml_dict["tool"]["propylen"]["proactive_versioning"]
+    
     python_version = pyproject_toml_dict["tool"]["poetry"]["dependencies"]["python"]
     
     packages = pipfile_dict["packages"]
@@ -131,7 +133,7 @@ def reconcile_dependencies():
     with open("./Pipfile.lock", "r") as f:
         lock_dict = json.load(f)
     try:
-        packages = {k: lock_dict['default'][k]['version'].replace("==", "^") if v == '*' else v for k, v in packages.items()}
+        packages = {k: lock_dict['default'][k]['version'].replace("==", "^") if (v == '*' and proactive_versioning) else v for k, v in packages.items()}
     except KeyError:
         install_packages(False, [])
         
@@ -156,7 +158,7 @@ def reconcile_dependencies_wrapper():
         click.echo(f" - {package}: {version}")
 
 
-def install_packages(dev, packages):
+def install_packages(dev, packages, reconcile):
     command = ['install']
     if dev:
         command.append("--dev")
@@ -166,23 +168,26 @@ def install_packages(dev, packages):
     except Exception:
         pass
     finally:
-        reconcile_dependencies()
+        if reconcile or toml.load("./pyproject.toml")["tool"]["propylen"]["auto_reconcile_dependencies"]:
+            reconcile_dependencies()
 
         
 @cli.command("install", help="Install packages")
-@click.option("-d", "--dev", is_flag=True, help="Install dev packages")
 @click.argument("packages", nargs=-1)
-def install_packages_wrapper(dev, packages):
+@click.option("-d", "--dev", is_flag=True, help="Install dev packages")
+@click.option("--reconcile/--no-reconcile", default=True, is_flag=True, help="Reconcile dependencies")
+def install_packages_wrapper(dev, packages, reconcile):
     if len(packages) != 0:
         click.echo(emoji.emojize(f":plus: Installing packages: {packages}"))
     else:
         click.echo(emoji.emojize(":package: Installing packages"))
-    install_packages(dev, packages)
+    install_packages(dev, packages, reconcile)
 
     
 @cli.command("uninstall", help="Uninstall packages")
 @click.argument("packages", nargs=-1)
-def uninstall_packages(packages):
+@click.option("--reconcile/--no-reconcile", default=True, is_flag=True, help="Reconcile dependencies")
+def uninstall_packages(packages, reconcile):
     click.echo(emoji.emojize(f":minus: Uninstalling packages: {packages}"))
     command = ['uninstall']
     command.extend(packages)
@@ -191,7 +196,8 @@ def uninstall_packages(packages):
     except Exception:
         pass
     finally:
-        reconcile_dependencies()
+        if reconcile or toml.load("./pyproject.toml")["tool"]["propylen"]["auto_reconcile_dependencies"]:
+            reconcile_dependencies()
 
 
 @cli.command("build", help="Build a package into a wheel")

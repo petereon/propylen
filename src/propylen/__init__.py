@@ -9,7 +9,7 @@ from cleo import CommandTester
 
 import emoji
 
-poetry_version = "1.1.13 "
+poetry_version = "1.1.13"
 
 
 @click.group()

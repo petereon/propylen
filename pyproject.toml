@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "propylen"
-version = "0.4.2"
+version = "0.4.3"
 description = "Python project scaffolding generator"
 authors = [ "Petereon <pvyboch1@gmail.com>",]
 license = "MIT"
@@ -12,6 +12,10 @@ repository = "https://github.com/petereon/propylen"
 readme = "README.md"
 keywords = [ "project", "template", "generator", "scaffolding",]
 classifiers = [ "License :: OSI Approved :: MIT License", "Programming Language :: Python :: 3", "Natural Language :: English",]
+
+[tool.propylen]
+proactive_versioning = true
+auto_reconcile_dependencies = true
 
 [tool.poetry.dependencies]
 poetry = "^1.1.13"
@@ -31,7 +35,3 @@ python_functions = [ "test",]
 minversion = "6.0"
 addopts = "--cov=propylen --cov-report=term-missing"
 testpaths = [ "test",]
-
-[tool.propylen]
-proactive_versioning = true
-auto_reconcile_dependencies = true

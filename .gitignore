@@ -1,2 +1,5 @@
 .coverage
-Pipfile.lock
+*.lock
+__pycache__
+.vscode
+dist/

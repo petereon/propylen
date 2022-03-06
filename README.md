@@ -15,6 +15,19 @@ pipx install propylen
 
 ## Initialize project
 
+Propylen generates project structure of type:
+```
+{project-name} 
+ |- src/
+     |- {project-name}
+         |- __init__.py
+         |- __main__.py
+ |- test/
+ |- Pipfile
+ |- pyproject.toml
+ |- README.md
+```
+
 You can generate a project structure interactively:
 ```shell
 propylen init <project-name>
@@ -26,7 +39,11 @@ propylen init -h
 ```
 ## Package Management
 
-__pipenv__ is used as a backend for package management. Options are stripped down.
+`pipenv` is used as a backend for package management. Options are stripped down.
+
+Propylen reconciles packages installed using `pipenv` (to `Pipfile`) to the `pyproject.toml` file. This behavior can be disabled temporarily by calling `propylen install` or `propylen uninstall` with `--no-reconcile` option or permanently by adding `auto_reconcile_dependencies = false` into `[tool.propylen]` section of `pyproject.toml`
+
+By default propylen tries to proactively version packages in `pyproject.toml` if no version is provided in `Pipfile`. This behavior can be disabled by adding `proactive_versioning = false` into `[tool.propylen]` section of `pyproject.toml`.
 
 You can also use `propylen` to install packages using
 ```shell
@@ -46,6 +63,12 @@ You can uninstall packages using
 ```shell
 propylen uninstall <package-name1> <package-name2> ...
 ```
+
+You can reconcile packages from `Pipfile` to `pyproject.toml` using
+```shell
+propylen reconcile
+```
+Unless it is unset as described above it happens automatically during installs and uninstalls.
 
 ## Building
 

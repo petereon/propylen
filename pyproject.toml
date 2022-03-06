@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "propylen"
-version = "0.4.3"
+version = "0.4.4"
 description = "Python project scaffolding generator"
 authors = [ "Petereon <pvyboch1@gmail.com>",]
 license = "MIT"

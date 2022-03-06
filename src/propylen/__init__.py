@@ -264,7 +264,7 @@ def reconcile_dependencies():
     
     pyproject_toml_dict = toml.load("./pyproject.toml")
     
-    proactive_versioning = pyproject_toml_dict.get("tool", {}).get("propylen", {}).get("proactive_versioning", False)
+    proactive_versioning = pyproject_toml_dict.get("tool", {}).get("propylen", {}).get("proactive_versioning", True)
     try:
         
         python_version = pyproject_toml_dict["tool"]["poetry"]["dependencies"]["python"]

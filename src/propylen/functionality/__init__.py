@@ -51,8 +51,8 @@ def generate_new_pyproject_toml(name, path, version, author, email, description,
                     "ini_options": {
                         "python_files": ["*test*.py"],
                         "python_functions": ["test"],
-                        "minversion": "6.0",
-                        "addopts": f"--cov={name} --cov-report=term-missing",
+                        'bdd_features_base_dir': 'test/e2e/features',
+                        'addopts': '--pspec -p no:warnings --cov-config=.coveragerc junit_family=xunit2',
                         "testpaths": ["test"],
             }
         }
@@ -139,8 +139,17 @@ def generate_new_pipfile(name, path, include_tests):
     }
     
     if include_tests:
-        pipfile_dict["dev-packages"]["pytest"] = "*"
-        pipfile_dict["dev-packages"]["pytest-cov"] = "*"
+        pipfile_dict["dev-packages"] = {
+            'pytest': "*",
+            'pytest-bdd': "*",
+            'pytest-describe-it': "*",
+            'pytest-html': "*",
+            'pytest-cov': "*",
+            'pytest-pspec': "*",
+            'pytest-mock': "~=3.6.1",
+            'pytest-describe': "*",
+            'pytest-watch': "*"
+        }
         pipfile_dict["scripts"]["test"] = "pytest"
  
     with open(f"{path}/{name}/Pipfile", "w") as f:
